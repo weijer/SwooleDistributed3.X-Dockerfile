@@ -21,7 +21,14 @@ SwooleDistributed框架的Dockerfile文件
 
 # Docker运行
 
-
+```
+docker run -d -it --name sd_docker \
+        -p 19081:9081 \ # 映射端口
+        -p 19082:9082 \
+        -p 19083:9083 \
+        -v /mnt/hgfs/dev/weijer/jgy_message:/home/server \ # 映射到本地磁盘
+        weijer/sd_docker:latest
+```
 
 
 
