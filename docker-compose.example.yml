@@ -6,5 +6,5 @@ services:
         volumes:
             - /home/work/server/html/plugin:/home/work/server/html/plugin
         ports:
-            - "8080:80"
+            - "18280:80"
         command: php /home/work/server/html/plugin/bin/start_swoole_server.php start

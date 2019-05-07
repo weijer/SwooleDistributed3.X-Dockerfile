@@ -1,9 +1,9 @@
-FROM centos:centos7
+FROM centos:centos7.2.1511
 
 MAINTAINER gaowenfei
 
 ENV SRC_DIR /usr/local
-ENV PHP_VERSION 7.2.17
+ENV PHP_VERSION 7.2.18
 ENV SWOOLE_VERSION 4.0.4
 ENV PHP_DIR /usr/local/php/${PHP_VERSION}
 ENV PHP_INI_DIR /etc/php/${PHP_VERSION}/cli
