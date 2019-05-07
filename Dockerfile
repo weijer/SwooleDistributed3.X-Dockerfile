@@ -41,7 +41,6 @@ RUN yum -y install \
         glibc-headers \
         gcc-c++ \
         git \
-        composer \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
@@ -144,5 +143,8 @@ RUN cd ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION} \
     && rm -f ${SRC_DIR}/inotify-${PHPINOTIFY_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION}
 
+# composer
+RUN curl -sS https://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer
 
 COPY ./config/* ${INIT_FILE}/
