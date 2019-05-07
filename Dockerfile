@@ -20,6 +20,7 @@ RUN echo "include /etc/ld.so.conf.d/*.conf" > /etc/ld.so.conf \
 # tools
 RUN yum -y install \
         wget \
+        vim \
         gcc \
         make \
         autoconf \
@@ -39,6 +40,8 @@ RUN yum -y install \
         libedit-devel \
         glibc-headers \
         gcc-c++ \
+        git \
+        composer \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
