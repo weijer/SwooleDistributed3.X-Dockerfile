@@ -41,6 +41,8 @@ RUN yum -y install \
         glibc-headers \
         gcc-c++ \
         git \
+        net-tools \
+        initscripts \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
