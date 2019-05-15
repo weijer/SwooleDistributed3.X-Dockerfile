@@ -48,6 +48,22 @@ RUN yum -y install \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
 
+RUN mkdir /var/run/sshd
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+
+# 指定root密码
+RUN /bin/echo 'root:123456'|chpasswd
+
+#开放端口22
+EXPOSE 22
+
+#启动sshd
+CMD ["/usr/sbin/sshd -D"]
+
+#加载开机启动项
+CMD ["/usr/sbin/init"]
+
 # php
 ADD install/php-${PHP_VERSION}.tar.gz ${SRC_DIR}/
 RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
