@@ -44,6 +44,8 @@ RUN yum -y install \
         git \
         net-tools \
         initscripts \
+        unzip \
+        zip \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
