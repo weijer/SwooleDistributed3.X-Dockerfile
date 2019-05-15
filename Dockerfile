@@ -28,6 +28,7 @@ RUN yum -y install \
         libxml2-devel \
         openssl \
         openssl-devel \
+        openssh-server \
         curl \
         curl-devel \
         pcre \
