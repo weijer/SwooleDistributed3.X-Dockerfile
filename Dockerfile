@@ -58,7 +58,7 @@ RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
 RUN /bin/echo 'root:123456'|chpasswd
 
 #开放端口22
-EXPOSE 1025
+EXPOSE 22
 
 #启动sshd
 CMD ["/usr/sbin/sshd -D"]
