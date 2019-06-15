@@ -46,6 +46,7 @@ RUN yum -y install \
         initscripts \
         unzip \
         zip \
+        httpd \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
@@ -65,10 +66,6 @@ CMD ["/usr/sbin/sshd -D"]
 
 #加载开机启动项
 CMD ["/usr/sbin/init"]
-
-# 安装apache
-RUN yum -y install httpd \
-    && yum clean all
 
 # 安装php
 ADD install/php-${PHP_VERSION}.tar.gz ${SRC_DIR}/
