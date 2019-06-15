@@ -46,6 +46,8 @@ RUN yum -y install \
         initscripts \
         unzip \
         zip \
+        libpng \
+        libpng-devel \
         httpd \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
