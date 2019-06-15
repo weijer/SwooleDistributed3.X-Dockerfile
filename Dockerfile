@@ -1,6 +1,6 @@
 FROM centos:centos7.2.1511
 
-MAINTAINER gaowenfei
+MAINTAINER weijer
 
 ENV SRC_DIR /usr/local
 ENV PHP_VERSION 7.2.18
@@ -66,7 +66,11 @@ CMD ["/usr/sbin/sshd -D"]
 #加载开机启动项
 CMD ["/usr/sbin/init"]
 
-# php
+# 安装apache
+RUN yum -y install httpd \
+    && yum clean all
+
+# 安装php
 ADD install/php-${PHP_VERSION}.tar.gz ${SRC_DIR}/
 RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
     && ln -s /usr/lib64/libssl.so /usr/lib \
@@ -82,6 +86,9 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
        --enable-xml \
        --enable-zip \
        --with-curl \
+       --with-gd \
+       --with-gettext \
+       --with-freetype-dir \
        --with-libedit \
        --with-openssl \
        --with-zlib \
