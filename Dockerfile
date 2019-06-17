@@ -93,6 +93,7 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
        --with-pear \
        --with-zlib \
        --with-ldap \
+    && sed -i '/^EXTRA_LIBS/ s/$/ -llber/' Makefile \
     && make clean > /dev/null \
     && make \
     && make install \
