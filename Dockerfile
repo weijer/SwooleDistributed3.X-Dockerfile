@@ -57,6 +57,7 @@ RUN yum -y install \
         openldap-devel \
         epel-release \
         python-setuptools \
+    && cp -frp /usr/lib64/libldap* /usr/lib/  \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
