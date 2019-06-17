@@ -81,6 +81,7 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
         --with-config-file-path=${PHP_INI_DIR} \
        	--with-config-file-scan-dir="${PHP_INI_DIR}/conf.d" \
        --disable-cgi \
+       --enable-fpm \
        --enable-bcmath \
        --enable-mbstring \
        --enable-mysqlnd \
