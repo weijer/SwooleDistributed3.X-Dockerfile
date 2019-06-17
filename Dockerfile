@@ -57,8 +57,8 @@ RUN yum -y install \
     && yum clean all
 
 # 配置Apache
-RUN cp config/httpd.conf ${APACHE_CONF_DIR}/php.ini \
-    && cp config/0.conf ${APACHE_CONF_DIR}/vhost/php.ini \
+COPY config/httpd.conf ${APACHE_CONF_DIR}/
+COPY config/0.conf ${APACHE_CONF_DIR}/vhost/
 
 # 安装php
 ADD install/php-${PHP_VERSION}.tar.gz ${SRC_DIR}/
