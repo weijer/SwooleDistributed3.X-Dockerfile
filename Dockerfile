@@ -51,6 +51,8 @@ RUN yum -y install \
         zip \
         libpng \
         libpng-devel \
+        openldap \
+        openldap-devel \
         httpd \
         httpd-devel \
     && rm -rf /var/cache/{yum,ldconfig}/* \
