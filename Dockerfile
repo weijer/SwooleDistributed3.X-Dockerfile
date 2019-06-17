@@ -1,4 +1,4 @@
-FROM centos:centos7.2.1511
+FROM centos:centos7.4.1708
 
 MAINTAINER weijer
 
@@ -17,6 +17,7 @@ ENV PHPINOTIFY_VERSION 2.0.0
 RUN echo "include /etc/ld.so.conf.d/*.conf" > /etc/ld.so.conf \
     && cd /etc/ld.so.conf.d \
     && echo "/usr/local/lib" > /etc/ld.so.conf.d/libc.conf
+
 # tools
 RUN yum -y install \
         wget \
@@ -48,9 +49,14 @@ RUN yum -y install \
         zip \
         libpng \
         libpng-devel \
+        httpd \
+        httpd-devel \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
+
+# 安装Apache
+
 
 # 安装php
 ADD install/php-${PHP_VERSION}.tar.gz ${SRC_DIR}/
@@ -65,6 +71,7 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
        --enable-mysqlnd \
        --enable-opcache \
        --enable-pcntl \
+       --enable-fileinfo \
        --enable-xml \
        --enable-zip \
        --with-curl \
@@ -79,6 +86,7 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
        --with-pdo-mysql \
        --with-pear \
        --with-zlib \
+       --with-ldap \
     && make clean > /dev/null \
     && make \
     && make install \
@@ -152,6 +160,8 @@ RUN cd ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION} \
     && echo "extension=inotify.so" > ${INIT_FILE}/inotify.ini \
     && rm -f ${SRC_DIR}/inotify-${PHPINOTIFY_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION}
+
+
 
 # composer
 RUN curl -sS https://getcomposer.org/installer | php \
