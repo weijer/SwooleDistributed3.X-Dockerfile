@@ -51,6 +51,10 @@ RUN yum -y install \
         zip \
         libpng \
         libpng-devel \
+        re2c \
+        bison \
+        apr \
+        apr-util \
         openldap \
         openldap-devel \
         httpd \
