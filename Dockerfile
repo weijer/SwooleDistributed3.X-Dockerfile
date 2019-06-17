@@ -37,6 +37,7 @@ RUN yum -y install \
         pcre-devel \
         libxslt \
         libxslt-devel \
+        freetype-devel \
         bzip2 \
         bzip2-devel \
         libedit \
