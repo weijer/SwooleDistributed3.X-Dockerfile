@@ -1,4 +1,4 @@
-FROM centos:centos7.4.1708
+FROM centos:centos7
 
 MAINTAINER weijer
 
@@ -8,11 +8,11 @@ ENV SWOOLE_VERSION 4.0.4
 ENV PHP_DIR /usr/local/php/${PHP_VERSION}
 ENV PHP_INI_DIR /etc/php/${PHP_VERSION}/cli
 ENV INIT_FILE ${PHP_INI_DIR}/conf.d
-ENV APACHE_CONF_DIR /usr/local/apache/conf
 ENV HIREDIS_VERSION 0.13.3
 ENV PHPREDIS_VERSION 4.3.0
 ENV PHPDS_VERSION 1.2.4
 ENV PHPINOTIFY_VERSION 2.0.0
+ENV HTTPD_PREFIX /usr/local/apache2
 
 #set ldconf
 RUN echo "include /etc/ld.so.conf.d/*.conf" > /etc/ld.so.conf \
@@ -20,6 +20,8 @@ RUN echo "include /etc/ld.so.conf.d/*.conf" > /etc/ld.so.conf \
     && echo "/usr/local/lib" > /etc/ld.so.conf.d/libc.conf
 
 # tools
+RUN yum -y update
+
 RUN yum -y install \
         wget \
         vim \
@@ -51,22 +53,24 @@ RUN yum -y install \
         zip \
         libpng \
         libpng-devel \
-        re2c \
-        bison \
-        apr \
-        apr-util \
         openldap \
         openldap-devel \
-        httpd \
-        httpd-devel \
+        epel-release \
+        python-setuptools \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
 
+RUN easy_install supervisor
+
 # 配置Apache
-COPY config/httpd.conf ${APACHE_CONF_DIR}/
-COPY config/0.conf ${APACHE_CONF_DIR}/vhost/
-RUN cp -frp /usr/lib64/libldap* /usr/lib/
+ADD install-httpd.sh /
+RUN chmod +x /install-httpd.sh
+RUN sed -i 's/\r//' /install-httpd.sh
+RUN bash -c "/install-httpd.sh"
+ADD config/httpd/ /usr/local/apache2/conf
+RUN ln -sf /dev/stdout /usr/local/apache2/logs/access_log
+RUN ln -sf /dev/stdout /usr/local/apache2/logs/error_log
 
 # 安装php
 ADD install/php-${PHP_VERSION}.tar.gz ${SRC_DIR}/
@@ -179,3 +183,14 @@ RUN curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer
 
 COPY ./config/* ${INIT_FILE}/
+
+# ADD Source
+ADD app/ /usr/local/apache2/htdocs/app
+
+# Working dir
+WORKDIR $HTTPD_PREFIX
+
+# Run
+COPY supervisord.conf /etc/supervisor/supervisord.conf
+CMD ["/usr/bin/supervisord"]
+EXPOSE 80
