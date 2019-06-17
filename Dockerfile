@@ -60,6 +60,7 @@ RUN yum -y install \
 # 配置Apache
 COPY config/httpd.conf ${APACHE_CONF_DIR}/
 COPY config/0.conf ${APACHE_CONF_DIR}/vhost/
+RUN cp -frp /usr/lib64/libldap* /usr/lib/
 
 # 安装php
 ADD install/php-${PHP_VERSION}.tar.gz ${SRC_DIR}/
