@@ -94,6 +94,7 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
        --enable-xml \
        --enable-zip \
        --enable-intl \
+       --enable-sockets \
        --with-curl \
        --with-gd \
        --with-gettext \
