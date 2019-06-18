@@ -56,6 +56,9 @@ RUN yum -y install \
         openldap \
         openldap-devel \
         epel-release \
+        libicu-devel \
+        libunwind \
+        libicu \
         python-setuptools \
     && cp -frp /usr/lib64/libldap* /usr/lib/  \
     && rm -rf /var/cache/{yum,ldconfig}/* \
@@ -90,6 +93,7 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
        --enable-fileinfo \
        --enable-xml \
        --enable-zip \
+       --enable-intl \
        --with-curl \
        --with-gd \
        --with-gettext \
