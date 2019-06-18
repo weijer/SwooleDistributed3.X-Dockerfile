@@ -117,6 +117,9 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
     && rm -f ${SRC_DIR}/php-${PHP_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/php-${PHP_VERSION}
 
+# php-fpm配置文件
+ADD config/php-fpm/php-fpm-7.2.conf /usr/local/php/7.2.18/etc/php-fpm.conf
+
 #  hiredis
 ADD install/hiredis-${HIREDIS_VERSION}.tar.gz ${SRC_DIR}/
 RUN cd ${SRC_DIR}/hiredis-${HIREDIS_VERSION} \
