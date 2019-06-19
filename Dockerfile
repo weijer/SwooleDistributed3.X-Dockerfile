@@ -56,8 +56,6 @@ RUN yum -y install \
         initscripts \
         unzip \
         zip \
-        libpng \
-        libpng-devel \
         openldap \
         openldap-devel \
         epel-release \
