@@ -31,6 +31,10 @@ RUN yum -y install \
         autoconf \
         libxml2 \
         libxml2-devel \
+        libjpeg-turbo \
+        libjpeg-turbo-devel \
+        libpng \
+        libpng-devel \
         openssl \
         openssl-devel \
         openssh-server \
