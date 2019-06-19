@@ -10,6 +10,7 @@ ENV PHP_INI_DIR /etc/php/${PHP_VERSION}/cli
 ENV INIT_FILE ${PHP_INI_DIR}/conf.d
 ENV HIREDIS_VERSION 0.13.3
 ENV PHPREDIS_VERSION 4.3.0
+ENV PHPIMAGICK_VERSION 3.4.3
 ENV PHPDS_VERSION 1.2.4
 ENV PHPINOTIFY_VERSION 2.0.0
 ENV HTTPD_PREFIX /usr/local/apache2
@@ -59,6 +60,8 @@ RUN yum -y install \
         libicu-devel \
         libunwind \
         libicu \
+        ImageMagick \
+        ImageMagick-devel \
         python-setuptools \
     && cp -frp /usr/lib64/libldap* /usr/lib/  \
     && rm -rf /var/cache/{yum,ldconfig}/* \
@@ -160,6 +163,17 @@ RUN cd ${SRC_DIR}/phpredis-${PHPREDIS_VERSION} \
     && rm -f ${SRC_DIR}/redis-${PHPREDIS_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/phpredis-${PHPREDIS_VERSION}
 
+# imagick
+ADD install/imagick-${PHPIMAGICK_VERSION}.tgz ${SRC_DIR}/
+RUN cd ${SRC_DIR}/imagick-${PHPIMAGICK_VERSION} \
+    && phpize \
+    && ./configure --with-imagick=/usr/local/imagemagick \
+    && make clean > /dev/null \
+    && make \
+    && make install \
+    && echo "extension=imagick.so" > ${INIT_FILE}/imagick.ini \
+    && rm -f ${SRC_DIR}/imagick-${PHPIMAGICK_VERSION}.tgz \
+    && rm -rf ${SRC_DIR}/imagick-${PHPIMAGICK_VERSION}
 
 #  ds
 ADD install/ds-${PHPDS_VERSION}.tar.gz ${SRC_DIR}/
