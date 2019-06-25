@@ -101,6 +101,8 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
        --enable-intl \
        --enable-sockets \
        --with-curl \
+       --with-png-dir \
+       --with-jpeg-dir \
        --with-gd \
        --with-gettext \
        --with-freetype-dir \
@@ -113,6 +115,7 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
        --with-pear \
        --with-zlib \
        --with-ldap \
+       --with-jpeg-dir=/usr \
     && sed -i '/^EXTRA_LIBS/ s/$/ -llber/' Makefile \
     && make clean > /dev/null \
     && make \
