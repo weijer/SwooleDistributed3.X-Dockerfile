@@ -1,0 +1,46 @@
+version: "0.1"
+
+services:
+  redis:
+    container_name: "redis_5"
+    image: "docker.io/redis"
+    restart: always
+    command:
+      - redis-server --requirepass strack
+      - redis-server --appendonly yes
+    ports:
+      - "36379:6379"
+  mysql:
+    container_name: "mysql_5.7"
+    environment:
+      MYSQL_ROOT_PASSWORD: "strack@2019"
+    image: "docker.io/mysql:5.7"
+    restart: always
+    ports:
+      - "3306:3306"
+  rabbitmq:
+    container_name: "rabbitmq"
+    environment:
+      RABBITMQ_DEFAULT_USER: "strack"
+      RABBITMQ_DEFAULT_PASS: "strack"
+    image: "docker.io/rabbitmq:management"
+    restart: always
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "25672:25672"
+      - "61613:61613"
+      - "1883:1883"
+  strack:
+    container_name: "strack"
+    image: "docker.io/weijer/sd_docker:strack"
+    restart: always
+    volumes:
+      - "/home/work/server/html/plugin:/home/work/server/html/plugin"
+    ports:
+      - "18094:80"
+      - "18095:8080"
+      - "19101:9082"
+      - "19102:9083"
+      - "19103:9092"
+      - "19104:9093"
