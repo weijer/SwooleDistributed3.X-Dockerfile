@@ -3,6 +3,7 @@ FROM centos:centos7
 MAINTAINER weijer
 
 ENV SRC_DIR /usr/local
+ENV CMAKE_VERSION 3.10.2
 ENV PHP_VERSION 7.2.18
 ENV SWOOLE_VERSION 4.0.4
 ENV PHP_DIR /usr/local/php/${PHP_VERSION}
@@ -30,7 +31,7 @@ RUN yum -y install \
         vim \
         gcc \
         make \
-        camke \
+        automake \
         autoconf \
         libxml2 \
         libxml2-devel \
@@ -75,6 +76,14 @@ RUN yum -y install \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
     && yum clean all
+
+# 安装Cmake
+ADD install/cmake-${CMAKE_VERSION}.tar.gz ${SRC_DIR}/
+RUN cd ${SRC_DIR}/cmake-${CMAKE_VERSION} \
+    && ./bootstrap \
+    && gmake \
+    && gmake install \
+    && rm -f ${SRC_DIR}/cmake-${CMAKE_VERSION}.tar.gz
 
 RUN easy_install supervisor
 
