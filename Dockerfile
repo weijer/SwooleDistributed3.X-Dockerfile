@@ -30,6 +30,7 @@ RUN yum -y install \
         vim \
         gcc \
         make \
+        camke \
         autoconf \
         libxml2 \
         libxml2-devel \
@@ -176,10 +177,10 @@ RUN cd ${SRC_DIR}/phpredis-${PHPREDIS_VERSION} \
 # rabbitmq-c
 ADD install/rabbitmq-c-${RABBITMQ_VERSION}.tar.gz ${SRC_DIR}/
 RUN cd ${SRC_DIR}/rabbitmq-c-${RABBITMQ_VERSION} \
-    && ./configure --prefix=/usr/local/rabbitmq-c \
-    && make clean > /dev/null \
-    && make \
-    && make install \
+    && mkdir build && cd build \
+    && cmake -DCMAKE_INSTALL_PREFIX=/usr/local/rabbitmq-c .. \
+    && cmake --build .  --target install \
+    && ln -s lib64 lib \
     && rm -f ${SRC_DIR}/rabbitmq-c-${RABBITMQ_VERSION}.tar.gz
 
 # amqp
@@ -241,6 +242,9 @@ ADD app/ /usr/local/apache2/htdocs/app
 
 # Working dir
 WORKDIR $HTTPD_PREFIX
+
+# 拷贝项目代码
+
 
 # Run
 COPY supervisord.conf /etc/supervisor/supervisord.conf
