@@ -10,6 +10,8 @@ ENV PHP_INI_DIR /etc/php/${PHP_VERSION}/cli
 ENV INIT_FILE ${PHP_INI_DIR}/conf.d
 ENV HIREDIS_VERSION 0.13.3
 ENV PHPREDIS_VERSION 4.3.0
+ENV RABBITMQ_VERSION 0.9.0
+ENV AMQP_VERSION 1.9.3
 ENV PHPIMAGICK_VERSION 3.4.3
 ENV PHPDS_VERSION 1.2.4
 ENV PHPINOTIFY_VERSION 2.0.0
@@ -65,6 +67,9 @@ RUN yum -y install \
         ImageMagick \
         ImageMagick-devel \
         python-setuptools \
+        rabbitmq-server \
+        librabbitmq \
+        librabbitmq-devel \
     && cp -frp /usr/lib64/libldap* /usr/lib/  \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
@@ -168,6 +173,26 @@ RUN cd ${SRC_DIR}/phpredis-${PHPREDIS_VERSION} \
     && rm -f ${SRC_DIR}/redis-${PHPREDIS_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/phpredis-${PHPREDIS_VERSION}
 
+# rabbitmq-c
+ADD install/rabbitmq-c-${RABBITMQ_VERSION}.tar.gz ${SRC_DIR}/
+RUN cd ${SRC_DIR}/rabbitmq-c-${RABBITMQ_VERSION} \
+    && ./configure --prefix=/usr/local/rabbitmq-c \
+    && make clean > /dev/null \
+    && make \
+    && make install \
+    && rm -f ${SRC_DIR}/rabbitmq-c-${RABBITMQ_VERSION}.tar.gz
+
+# amqp
+ADD install/amqp-${AMQP_VERSION}.tar.gz ${SRC_DIR}/
+RUN cd ${SRC_DIR}/amqp-${AMQP_VERSION} \
+    && phpize \
+    && ./configure --with-php-config=${PHP_DIR}/bin/php-config --with-amqp --with-librabbitmq-dir=/usr/local/rabbitmq-c/ \
+    && make clean > /dev/null \
+    && make \
+    && make install \
+    && echo "extension=amqp.so" > ${INIT_FILE}/amqp.ini \
+    && rm -f ${SRC_DIR}/amqp-${AMQP_VERSION}.tar.gz
+
 # imagick
 ADD install/imagick-${PHPIMAGICK_VERSION}.tgz ${SRC_DIR}/
 RUN cd ${SRC_DIR}/imagick-${PHPIMAGICK_VERSION} \
@@ -204,8 +229,6 @@ RUN cd ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION} \
     && echo "extension=inotify.so" > ${INIT_FILE}/inotify.ini \
     && rm -f ${SRC_DIR}/inotify-${PHPINOTIFY_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION}
-
-
 
 # composer
 RUN curl -sS https://getcomposer.org/installer | php \
