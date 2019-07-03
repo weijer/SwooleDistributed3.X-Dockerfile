@@ -250,7 +250,7 @@ RUN cd ${SRC_DIR}/sdebug-${SDEBUG_VERSION} \
     && make clean > /dev/null \
     && make \
     && make install \
-    && echo "extension=xdebug.so" > ${INIT_FILE}/xdebug.ini \
+    && echo "zend_extension=xdebug.so" > ${INIT_FILE}/xdebug.ini \
     && rm -f ${SRC_DIR}/amqp-${SDEBUG_VERSION}.tar.gz
 
 # composer
