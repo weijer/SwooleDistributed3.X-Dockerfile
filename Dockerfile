@@ -16,6 +16,7 @@ ENV AMQP_VERSION 1.9.3
 ENV PHPIMAGICK_VERSION 3.4.3
 ENV PHPDS_VERSION 1.2.4
 ENV PHPINOTIFY_VERSION 2.0.0
+ENV SDEBUG_VERSION 2.7
 ENV HTTPD_PREFIX /usr/local/apache2
 
 #set ldconf
@@ -158,7 +159,6 @@ RUN cd ${SRC_DIR}/hiredis-${HIREDIS_VERSION} \
     && rm -f ${SRC_DIR}/hiredis-${HIREDIS_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/hiredis-${HIREDIS_VERSION}
 
-
 #  swoole
 ADD install/swoole-${SWOOLE_VERSION}.tar.gz ${SRC_DIR}/
 RUN cd ${SRC_DIR}/swoole-src-${SWOOLE_VERSION} \
@@ -239,6 +239,19 @@ RUN cd ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION} \
     && echo "extension=inotify.so" > ${INIT_FILE}/inotify.ini \
     && rm -f ${SRC_DIR}/inotify-${PHPINOTIFY_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION}
+
+
+# sdebug
+ADD install/sdebug-${SDEBUG_VERSION}.tar.gz ${SRC_DIR}/
+RUN cd ${SRC_DIR}/sdebug-${SDEBUG_VERSION} \
+    && ./rebuild.sh \
+    && phpize \
+    && ./configure --enable-xdebug --with-php-config=${PHP_DIR}/bin/php-config \
+    && make clean > /dev/null \
+    && make \
+    && make install \
+    && echo "extension=xdebug.so" > ${INIT_FILE}/xdebug.ini \
+    && rm -f ${SRC_DIR}/amqp-${SDEBUG_VERSION}.tar.gz
 
 # composer
 RUN curl -sS https://getcomposer.org/installer | php \
