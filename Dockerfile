@@ -11,7 +11,7 @@ ENV PHP_INI_DIR /etc/php/${PHP_VERSION}/cli
 ENV INIT_FILE ${PHP_INI_DIR}/conf.d
 ENV HIREDIS_VERSION 0.13.3
 ENV PHPREDIS_VERSION 4.3.0
-ENV RABBITMQ_VERSION 0.9.0
+ENV RABBITMQ_VERSION 0.8.0
 ENV AMQP_VERSION 1.9.3
 ENV PHPIMAGICK_VERSION 3.4.3
 ENV PHPDS_VERSION 1.2.4
@@ -186,10 +186,10 @@ RUN cd ${SRC_DIR}/phpredis-${PHPREDIS_VERSION} \
 # rabbitmq-c
 ADD install/rabbitmq-c-${RABBITMQ_VERSION}.tar.gz ${SRC_DIR}/
 RUN cd ${SRC_DIR}/rabbitmq-c-${RABBITMQ_VERSION} \
-    && mkdir build && cd build \
-    && cmake -DCMAKE_INSTALL_PREFIX=/usr/local/rabbitmq-c .. \
-    && cmake --build .  --target install \
-    && ln -s lib64 lib \
+    && ./configure --prefix=/usr/local/rabbitmq-c/ \
+    && make clean > /dev/null \
+    && make \
+    && make install \
     && rm -f ${SRC_DIR}/rabbitmq-c-${RABBITMQ_VERSION}.tar.gz
 
 # amqp
