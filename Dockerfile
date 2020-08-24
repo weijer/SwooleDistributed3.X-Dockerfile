@@ -5,7 +5,7 @@ MAINTAINER weijer
 ENV SRC_DIR /usr/local
 ENV CMAKE_VERSION 3.10.2
 ENV PHP_VERSION 7.2.18
-ENV SWOOLE_VERSION 4.0.4
+ENV SWOOLE_VERSION 4.5.2
 ENV PHP_DIR /usr/local/php/${PHP_VERSION}
 ENV PHP_INI_DIR /etc/php/${PHP_VERSION}/cli
 ENV INIT_FILE ${PHP_INI_DIR}/conf.d
@@ -163,7 +163,7 @@ RUN cd ${SRC_DIR}/hiredis-${HIREDIS_VERSION} \
 ADD install/swoole-${SWOOLE_VERSION}.tar.gz ${SRC_DIR}/
 RUN cd ${SRC_DIR}/swoole-src-${SWOOLE_VERSION} \
     && phpize \
-    && ./configure --enable-async-redis --enable-openssl --enable-mysqlnd --enable-coroutine \
+    && ./configure --enable-async-redis --enable-openssl --enable-mysqlnd \
     && make clean > /dev/null \
     && make \
     && make install \
