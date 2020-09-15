@@ -66,7 +66,7 @@ RUN apk update && apk add --no-cache bash \
                                   apache2 \
                                   libxml2-dev \
                                   apache2-utils \
-                                  ca-certificates \
+                                  ca-certificates
 
 RUN  rm -rf /var/cache/apk/*
 
