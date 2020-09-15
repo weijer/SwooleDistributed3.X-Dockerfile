@@ -4,15 +4,13 @@ MAINTAINER weijer
 
 ENV SRC_DIR /usr/local
 ENV CMAKE_VERSION 3.10.2
-ENV PHP_VERSION 7.2.18
-ENV SWOOLE_VERSION 4.5.2
+ENV PHP_VERSION 7.4.10
+ENV SWOOLE_VERSION 4.5.3
 ENV PHP_DIR /usr/local/php/${PHP_VERSION}
 ENV PHP_INI_DIR /etc/php/${PHP_VERSION}/cli
 ENV INIT_FILE ${PHP_INI_DIR}/conf.d
 ENV HIREDIS_VERSION 0.13.3
 ENV PHPREDIS_VERSION 4.3.0
-ENV RABBITMQ_VERSION 0.8.0
-ENV AMQP_VERSION 1.9.3
 ENV PHPIMAGICK_VERSION 3.4.3
 ENV PHPDS_VERSION 1.2.4
 ENV PHPINOTIFY_VERSION 2.0.0
@@ -69,9 +67,6 @@ RUN yum -y install \
         ImageMagick \
         ImageMagick-devel \
         python-setuptools \
-        rabbitmq-server \
-        librabbitmq \
-        librabbitmq-devel \
     && cp -frp /usr/lib64/libldap* /usr/lib/  \
     && rm -rf /var/cache/{yum,ldconfig}/* \
     && rm -rf /etc/ld.so.cache \
@@ -115,10 +110,10 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
        --enable-zip \
        --enable-intl \
        --enable-sockets \
+       --enable-gd \
        --with-curl \
        --with-png-dir \
        --with-jpeg-dir \
-       --with-gd \
        --with-gettext \
        --with-freetype-dir \
        --with-libedit \
@@ -146,7 +141,7 @@ RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
     && rm -rf ${SRC_DIR}/php-${PHP_VERSION}
 
 # php-fpm配置文件
-COPY config/php-fpm/php-fpm-7.2.conf /usr/local/php/7.2.18/etc/php-fpm.conf
+COPY config/php-fpm/php-fpm-7.2.conf /usr/local/php/${PHP_VERSION}/etc/php-fpm.conf
 
 #  hiredis
 ADD install/hiredis-${HIREDIS_VERSION}.tar.gz ${SRC_DIR}/
@@ -163,7 +158,7 @@ RUN cd ${SRC_DIR}/hiredis-${HIREDIS_VERSION} \
 ADD install/swoole-${SWOOLE_VERSION}.tar.gz ${SRC_DIR}/
 RUN cd ${SRC_DIR}/swoole-src-${SWOOLE_VERSION} \
     && phpize \
-    && ./configure --enable-async-redis --enable-openssl --enable-mysqlnd \
+    && ./configure --enable-openssl --enable-http2 \
     && make clean > /dev/null \
     && make \
     && make install \
@@ -182,26 +177,6 @@ RUN cd ${SRC_DIR}/phpredis-${PHPREDIS_VERSION} \
     && echo "extension=redis.so" > ${INIT_FILE}/redis.ini \
     && rm -f ${SRC_DIR}/redis-${PHPREDIS_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/phpredis-${PHPREDIS_VERSION}
-
-# rabbitmq-c
-ADD install/rabbitmq-c-${RABBITMQ_VERSION}.tar.gz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/rabbitmq-c-${RABBITMQ_VERSION} \
-    && ./configure --prefix=/usr/local/rabbitmq-c/ \
-    && make clean > /dev/null \
-    && make \
-    && make install \
-    && rm -f ${SRC_DIR}/rabbitmq-c-${RABBITMQ_VERSION}.tar.gz
-
-# amqp
-ADD install/amqp-${AMQP_VERSION}.tar.gz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/amqp-${AMQP_VERSION} \
-    && phpize \
-    && ./configure --with-php-config=${PHP_DIR}/bin/php-config --with-amqp --with-librabbitmq-dir=/usr/local/rabbitmq-c/ \
-    && make clean > /dev/null \
-    && make \
-    && make install \
-    && echo "extension=amqp.so" > ${INIT_FILE}/amqp.ini \
-    && rm -f ${SRC_DIR}/amqp-${AMQP_VERSION}.tar.gz
 
 # imagick
 ADD install/imagick-${PHPIMAGICK_VERSION}.tgz ${SRC_DIR}/
@@ -226,19 +201,6 @@ RUN cd ${SRC_DIR}/extension-${PHPDS_VERSION} \
     && echo "extension=ds.so" > ${INIT_FILE}/ds.ini \
     && rm -f ${SRC_DIR}/ds-${PHPDS_VERSION}.tar.gz \
     && rm -rf ${SRC_DIR}/extension-${PHPDS_VERSION}
-
-
-#  inotify
-ADD install/inotify-${PHPINOTIFY_VERSION}.tar.gz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION} \
-    && phpize \
-    && ./configure \
-    && make clean > /dev/null \
-    && make \
-    && make install \
-    && echo "extension=inotify.so" > ${INIT_FILE}/inotify.ini \
-    && rm -f ${SRC_DIR}/inotify-${PHPINOTIFY_VERSION}.tar.gz \
-    && rm -rf ${SRC_DIR}/php-inotify-${PHPINOTIFY_VERSION}
 
 # composer
 RUN curl -sS https://getcomposer.org/installer | php \
