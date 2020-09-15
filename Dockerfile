@@ -64,14 +64,12 @@ ENV \
 # PHP.earth Alpine repository for better developer experience
 ADD https://repos.php.earth/alpine/phpearth.rsa.pub /etc/apk/keys/phpearth.rsa.pub
 
-RUN apk --update add \
-    bash \
-    alpine-sdk \
-    openssl-dev
-
 RUN set -x \
     && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories \
-    && apk add $DEPS \
+    && apk update && apk add --no-cache bash \
+                                  alpine-sdk \
+                                  openssl-dev \
+                                  $DEPS \
     && rm -rf /var/cache/apk/*
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
