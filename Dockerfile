@@ -71,9 +71,9 @@ RUN apk --update add \
 
 RUN set -x \
     && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories \
-    && apk update \
-    && apk add --no-cache $DEPS \
+    && apk add $DEPS \
     && rm -rf /var/cache/apk/*
+
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
 RUN composer self-update
