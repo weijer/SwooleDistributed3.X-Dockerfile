@@ -1,4 +1,4 @@
-FROM kalicki2k/alpine-apache:3.12
+FROM kalicki2k/alpine-apache:3.11
 
 MAINTAINER weijer
 
