@@ -1,4 +1,4 @@
-FROM alpine:3.12
+FROM alpine:edge
 LABEL maintainer="weijer <weiwei163@foxmail.com>" version="1.0"
 
 ENV \
@@ -71,9 +71,9 @@ RUN apk --update add \
 
 RUN set -x \
     && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories \
+    && apk update \
     && apk add --no-cache $DEPS \
     && rm -rf /var/cache/apk/*
-
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
 RUN composer self-update
