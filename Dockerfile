@@ -1,17 +1,16 @@
 FROM alpine:edge
 LABEL maintainer="weijer <weiwei163@foxmail.com>" version="1.0"
 
-ENV \
-    # When using Composer, disable the warning about running commands as root/super user
-    COMPOSER_ALLOW_SUPERUSER=1 \
+ENV \ COMPOSER_ALLOW_SUPERUSER=1
 
 
 # PHP.earth Alpine repository for better developer experience
 ADD https://repos.php.earth/alpine/phpearth.rsa.pub /etc/apk/keys/phpearth.rsa.pub
 
 RUN set -x \
-    && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories \
-    && apk update && apk add --no-cache bash \
+    && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories
+
+RUN apk update && apk add --no-cache bash \
                                   alpine-sdk \
                                   openssl-dev \
                                   nano \
