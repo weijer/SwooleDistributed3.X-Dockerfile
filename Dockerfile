@@ -12,8 +12,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1\
 ADD https://repos.php.earth/alpine/phpearth.rsa.pub /etc/apk/keys/phpearth.rsa.pub
 
 RUN set -ex \
-    && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories \
-    && apk update && apk add --no-cache bash \
+    && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories
+
+RUN apk update && apk add --no-cache bash \
                                   alpine-sdk \
                                   nano \
                                   curl \
