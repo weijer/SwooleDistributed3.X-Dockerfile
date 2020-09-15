@@ -1,12 +1,7 @@
 FROM alpine:edge
 LABEL maintainer="weijer <weiwei163@foxmail.com>" version="1.0"
 
-ARG swoole
-
-ENV COMPOSER_ALLOW_SUPERUSER=1\
-    SWOOLE_VERSION=${swoole:-"4.5.3"} \
-    #  install and remove building packages
-    PHPIZE_DEPS="autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c pcre-dev zlib-dev libtool automake"
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # PHP.earth Alpine repository for better developer experience
 ADD https://repos.php.earth/alpine/phpearth.rsa.pub /etc/apk/keys/phpearth.rsa.pub
@@ -14,7 +9,9 @@ ADD https://repos.php.earth/alpine/phpearth.rsa.pub /etc/apk/keys/phpearth.rsa.p
 RUN set -ex \
     && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories
 
-RUN apk update && apk add --no-cache alpine-sdk \
+RUN apk update && apk add --no-cache bash \
+                                  alpine-sdk \
+                                  openssl-dev \
                                   nano \
                                   curl \
                                   curl-dev \
@@ -70,47 +67,18 @@ RUN apk update && apk add --no-cache alpine-sdk \
                                   apache2-utils \
                                   ca-certificates
 
-# update
-RUN set -ex \
-        && apk update \
-        # for swoole extension libaio linux-headers
-        && apk add --no-cache libstdc++ openssl git bash \
-        && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS libaio-dev openssl-dev \
-        # download
-        && cd /tmp \
-        && curl -SL "https://github.com/swoole/swoole-src/archive/v${SWOOLE_VERSION}.tar.gz" -o swoole.tar.gz \
-        && ls -alh \
-        # php extension:swoole
-        && cd /tmp \
-        && mkdir -p swoole \
-        && tar -xf swoole.tar.gz -C swoole --strip-components=1 \
-        && ( \
-        cd swoole \
-        && phpize \
-        && ./configure --enable-mysqlnd --enable-openssl \
-        && make -s -j$(nproc) && make install \
-        ) \
-        && printf "extension=swoole.so\n\
-        swoole.use_shortname = 'Off'\n\
-        swoole.enable_coroutine = 'Off'\n\
-        " >/etc/php/7.4/conf.d/swoole.ini \
-        # clear
-        && php -v \
-        && php -m \
-        && php --ri swoole \
-        # ---------- clear works ----------
-        && apk del .build-deps \
-        && rm -rf /var/cache/apk/* /tmp/* /usr/share/man
-
+RUN  rm -rf /var/cache/apk/*
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+
 RUN composer self-update
 
 
+
 ## 以下 是 swoole
-RUN printf "no\n" | pecl install swoole \
-   && pecl clear-cache \
-   && echo "extension=swoole" >> /etc/php/7.4/php.ini
+#RUN printf "no\n" | pecl install swoole \
+#   && pecl clear-cache \
+#   && echo "extension=swoole" >> /etc/php/7.4/php.ini
 
 
 RUN mkdir /var/www/public/
