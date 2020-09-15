@@ -1,223 +1,110 @@
-FROM centos:centos7
+FROM alpine:3.12
+LABEL maintainer="weijer <weiwei163@foxmail.com>" version="1.0"
 
-MAINTAINER weijer
-
-ENV SRC_DIR /usr/local
-ENV CMAKE_VERSION 3.10.2
-ENV PHP_VERSION 7.4.10
-ENV SWOOLE_VERSION 4.5.3
-ENV PHP_DIR /usr/local/php/${PHP_VERSION}
-ENV PHP_INI_DIR /etc/php/${PHP_VERSION}/cli
-ENV INIT_FILE ${PHP_INI_DIR}/conf.d
-ENV HIREDIS_VERSION 0.13.3
-ENV PHPREDIS_VERSION 4.3.0
-ENV PHPIMAGICK_VERSION 3.4.3
-ENV PHPDS_VERSION 1.2.4
-ENV PHPINOTIFY_VERSION 2.0.0
-ENV HTTPD_PREFIX /usr/local/apache2
-
-#set ldconf
-RUN echo "include /etc/ld.so.conf.d/*.conf" > /etc/ld.so.conf \
-    && cd /etc/ld.so.conf.d \
-    && echo "/usr/local/lib" > /etc/ld.so.conf.d/libc.conf
-
-# tools
-RUN yum -y update
-
-RUN yum -y install \
-        wget \
-        vim \
-        gcc \
-        make \
-        automake \
-        autoconf \
-        libxml2 \
-        libxml2-devel \
-        libjpeg-turbo \
-        libjpeg-turbo-devel \
-        libpng \
-        libpng-devel \
-        openssl \
-        openssl-devel \
-        openssh-server \
-        curl \
-        curl-devel \
-        pcre \
-        pcre-devel \
-        libxslt \
-        libxslt-devel \
-        freetype-devel \
-        bzip2 \
-        bzip2-devel \
-        libedit \
-        libedit-devel \
-        glibc-headers \
-        gcc-c++ \
-        git \
-        net-tools \
-        initscripts \
-        unzip \
-        zip \
-        openldap \
-        openldap-devel \
-        epel-release \
-        libicu-devel \
-        libunwind \
-        libicu \
-        ImageMagick \
-        ImageMagick-devel \
-        python-setuptools \
-    && cp -frp /usr/lib64/libldap* /usr/lib/  \
-    && rm -rf /var/cache/{yum,ldconfig}/* \
-    && rm -rf /etc/ld.so.cache \
-    && yum clean all
-
-# 安装Cmake
-ADD install/cmake-${CMAKE_VERSION}.tar.gz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/cmake-${CMAKE_VERSION} \
-    && ./bootstrap \
-    && gmake \
-    && gmake install \
-    && rm -f ${SRC_DIR}/cmake-${CMAKE_VERSION}.tar.gz
-
-RUN easy_install supervisor
-
-# 配置Apache
-ADD install-httpd.sh /
-RUN chmod +x /install-httpd.sh
-RUN sed -i 's/\r//' /install-httpd.sh
-RUN bash -c "/install-httpd.sh"
-ADD config/httpd/ /usr/local/apache2/conf
-RUN ln -sf /dev/stdout /usr/local/apache2/logs/access_log
-RUN ln -sf /dev/stdout /usr/local/apache2/logs/error_log
-
-# 安装php
-ADD install/php-${PHP_VERSION}.tar.gz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/php-${PHP_VERSION} \
-    && ln -s /usr/lib64/libssl.so /usr/lib \
-    && ./configure --prefix=${PHP_DIR} \
-        --with-config-file-path=${PHP_INI_DIR} \
-       	--with-config-file-scan-dir="${PHP_INI_DIR}/conf.d" \
-       --disable-cgi \
-       --enable-fpm \
-       --enable-bcmath \
-       --enable-mbstring \
-       --enable-mysqlnd \
-       --enable-opcache \
-       --enable-pcntl \
-       --enable-fileinfo \
-       --enable-xml \
-       --enable-zip \
-       --enable-intl \
-       --enable-sockets \
-       --enable-gd \
-       --with-curl \
-       --with-png-dir \
-       --with-jpeg-dir \
-       --with-gettext \
-       --with-freetype-dir \
-       --with-libedit \
-       --with-openssl \
-       --with-zlib \
-       --with-curl \
-       --with-mysqli \
-       --with-pdo-mysql \
-       --with-pear \
-       --with-zlib \
-       --with-ldap \
-       --with-jpeg-dir=/usr \
-    && sed -i '/^EXTRA_LIBS/ s/$/ -llber/' Makefile \
-    && make clean > /dev/null \
-    && make \
-    && make install \
-    && ln -s ${PHP_DIR}/bin/php /usr/local/bin/ \
-    && ln -s ${PHP_DIR}/bin/phpize /usr/local/bin/ \
-    && ln -s ${PHP_DIR}/bin/pecl /usr/local/bin/ \
-    && ln -s ${PHP_DIR}/bin/php-config /usr/local/bin/ \
-    && mkdir -p ${PHP_INI_DIR}/conf.d \
-    && cp ${SRC_DIR}/php-${PHP_VERSION}/php.ini-production ${PHP_INI_DIR}/php.ini \
-    && echo -e "opcache.enable=1\nopcache.enable_cli=1\nzend_extension=opcache.so" > ${PHP_INI_DIR}/conf.d/10-opcache.ini \
-    && rm -f ${SRC_DIR}/php-${PHP_VERSION}.tar.gz \
-    && rm -rf ${SRC_DIR}/php-${PHP_VERSION}
-
-# php-fpm配置文件
-COPY config/php-fpm/php-fpm-7.2.conf /usr/local/php/${PHP_VERSION}/etc/php-fpm.conf
-
-#  hiredis
-ADD install/hiredis-${HIREDIS_VERSION}.tar.gz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/hiredis-${HIREDIS_VERSION} \
-    && make clean > /dev/null \
-    && make \
-    && make install \
-    && ldconfig \
-    && rm -f ${SRC_DIR}/hiredis-${HIREDIS_VERSION}.tar.gz \
-    && rm -rf ${SRC_DIR}/hiredis-${HIREDIS_VERSION}
+ENV \
+    # When using Composer, disable the warning about running commands as root/super user
+    COMPOSER_ALLOW_SUPERUSER=1 \
+    # Persistent runtime dependencies
+    DEPS="nano \
+		curl \
+        curl-dev \
+        php7.4 \
+        php7.4-intl \
+  	    php7.4-apache2 \
+  		php7.4-session \
+        php7.4-phar \
+        php7.4-mcrypt \
+        php7.4-bcmath \
+        php7.4-calendar \
+        php7.4-mbstring \
+        php7.4-exif \
+        php7.4-ftp \
+        php7.4-openssl \
+        php7.4-zip \
+        php7.4-gd \
+        php7.4-sysvsem \
+        php7.4-sysvshm \
+        php7.4-sysvmsg \
+        php7.4-shmop \
+        php7.4-sockets \
+        php7.4-zlib \
+        php7.4-bz2 \
+        php7.4-curl \
+        php7.4-simplexml \
+        php7.4-xml \
+        php7.4-opcache \
+        php7.4-dom \
+        php7.4-xmlreader \
+        php7.4-xmlwriter \
+        php7.4-tokenizer \
+        php7.4-ctype \
+        php7.4-session \
+        php7.4-fileinfo \
+        php7.4-iconv \
+        php7.4-json \
+        php7.4-mysqli \
+        php7.4-pdo \
+        php7.4-pdo_mysql \
+        php7.4-pdo_sqlite \
+        php7.4-redis \
+        php7.4-posix \
+        php7.4-dev \
+        php7.4-pear \
+        php7.4-fpm \
+        php7.4-pcntl \
+        php7.4-zip \
+  		php7.4-cgi \
+  		php7.4-bcmath \
+  		apache2 \
+  		libxml2-dev \
+  		apache2-utils \
+        ca-certificates"
 
 
-#  swoole
-ADD install/swoole-${SWOOLE_VERSION}.tar.gz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/swoole-src-${SWOOLE_VERSION} \
-    && phpize \
-    && ./configure --enable-openssl --enable-http2 \
-    && make clean > /dev/null \
-    && make \
-    && make install \
-    && echo "extension=swoole.so" > ${INIT_FILE}/swoole.ini \
-    && rm -f ${SRC_DIR}/swoole-${SWOOLE_VERSION}.tar.gz \
-    && rm -rf ${SRC_DIR}/swoole-src-${SWOOLE_VERSION}
+# PHP.earth Alpine repository for better developer experience
+ADD https://repos.php.earth/alpine/phpearth.rsa.pub /etc/apk/keys/phpearth.rsa.pub
 
-#  redis
-ADD install/redis-${PHPREDIS_VERSION}.tar.gz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/phpredis-${PHPREDIS_VERSION} \
-    && phpize \
-    && ./configure \
-    && make clean > /dev/null \
-    && make \
-    && make install \
-    && echo "extension=redis.so" > ${INIT_FILE}/redis.ini \
-    && rm -f ${SRC_DIR}/redis-${PHPREDIS_VERSION}.tar.gz \
-    && rm -rf ${SRC_DIR}/phpredis-${PHPREDIS_VERSION}
+RUN apk --update add \
+    bash \
+    alpine-sdk \
+    openssl-dev
 
-# imagick
-ADD install/imagick-${PHPIMAGICK_VERSION}.tgz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/imagick-${PHPIMAGICK_VERSION} \
-    && phpize \
-    && ./configure --with-imagick=/usr/local/imagemagick \
-    && make clean > /dev/null \
-    && make \
-    && make install \
-    && echo "extension=imagick.so" > ${INIT_FILE}/imagick.ini \
-    && rm -f ${SRC_DIR}/imagick-${PHPIMAGICK_VERSION}.tgz \
-    && rm -rf ${SRC_DIR}/imagick-${PHPIMAGICK_VERSION}
+RUN set -x \
+    && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories \
+    && apk add --no-cache $DEPS \
+    && rm -rf /var/cache/apk/*
 
-#  ds
-ADD install/ds-${PHPDS_VERSION}.tar.gz ${SRC_DIR}/
-RUN cd ${SRC_DIR}/extension-${PHPDS_VERSION} \
-    && phpize \
-    && ./configure \
-    && make clean > /dev/null \
-    && make \
-    && make install \
-    && echo "extension=ds.so" > ${INIT_FILE}/ds.ini \
-    && rm -f ${SRC_DIR}/ds-${PHPDS_VERSION}.tar.gz \
-    && rm -rf ${SRC_DIR}/extension-${PHPDS_VERSION}
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
-# composer
-RUN curl -sS https://getcomposer.org/installer | php \
-    && mv composer.phar /usr/local/bin/composer
+RUN composer self-update
 
-COPY ./config/* ${INIT_FILE}/
-
-# ADD Source
-ADD app/ /usr/local/apache2/htdocs/app
-
-# Working dir
-WORKDIR $HTTPD_PREFIX
-
-# 拷贝项目代码
+## 以下 是 swoole
+RUN printf "no\n" | pecl install swoole \
+   && pecl clear-cache \
+   && echo "extension=swoole" >> /etc/php/7.2/php.ini
 
 
-# Run
-COPY supervisord.conf /etc/supervisor/supervisord.conf
-CMD ["/usr/bin/supervisord"]
+RUN mkdir /var/www/public/
+VOLUME  /var/www/public/
+WORKDIR  /var/www/public/
+
+# AllowOverride ALL
+RUN sed -i 's#AllowOverride None#AllowOverride All#' /etc/apache2/httpd.conf
+
+# Enable Modules
+RUN sed -i 's/#LoadModule\ rewrite_module/LoadModule\ rewrite_module/' /etc/apache2/httpd.conf
+#RUN sed -i 's/#LoadModule\ deflate_module/LoadModule\ deflate_module/' /etc/apache2/httpd.conf
+#RUN sed -i 's/#LoadModule\ expires_module/LoadModule\ expires_module/' /etc/apache2/httpd.conf
+
+# Document Root to /var/www/public/
+RUN sed -i 's#/var/www/localhost/htdocs#/var/www/public#g' /etc/apache2/httpd.conf
+RUN sed -i 's/^Listen 80$/Listen 0.0.0.0:80/' /etc/apache2/httpd.conf
+
+# Modify php.ini settings
+RUN sed -i 's/memory_limit = .*/memory_limit = 256M/' /etc/php/php.ini
+RUN sed -i 's/opcache.enable=1/opcache.enable_cli=1/zend_extension=opcache.so/' /etc/php/php.ini
+RUN sed -i "s/^;date.timezone =$/date.timezone = \"PRC\"/" /etc/php/php.ini
+
 EXPOSE 80
+
+ENTRYPOINT ["httpd","-D","FOREGROUND"]
