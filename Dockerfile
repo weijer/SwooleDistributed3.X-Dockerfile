@@ -14,8 +14,7 @@ ADD https://repos.php.earth/alpine/phpearth.rsa.pub /etc/apk/keys/phpearth.rsa.p
 RUN set -ex \
     && echo "https://repos.php.earth/alpine/v3.9" >> /etc/apk/repositories
 
-RUN apk update && apk add --no-cache bash \
-                                  alpine-sdk \
+RUN apk update && apk add --no-cache alpine-sdk \
                                   nano \
                                   curl \
                                   curl-dev \
