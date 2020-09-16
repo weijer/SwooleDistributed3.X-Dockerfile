@@ -1,31 +1,19 @@
-# 简介
+## alpine-apache-php
+Alpine based image with apache2 and php7
 
-strack框架的Dockerfile文件
+[![](https://images.microbadger.com/badges/image/eriksoderblom/alpine-apache-php.svg)](https://microbadger.com/images/eriksoderblom/alpine-apache-php)
 
-# 框架版本
+# Build
+`docker build -t [image-name]:latest .`
 
-strack 1.0 
-
-# 环境
-
-## PHP版本
-
-7.4
-
-## PHP扩展
-
-1. redis 4.3.0
-1. swoole 4.0.4
-
-# Docker运行
+# Usage
 
 ```
-docker run -d -it --name sd_docker \
-         -p 18119:80 \
-        -v/mnt/hgfs/teamones:/usr/local/apache2/htdocs/app \ # 映射到本地磁盘
-        weijer/sd_docker:alpine
+docker run --detach 
+    --name alpine-apache-php \
+    --hostname example.com \
+    --publish 80:80 \
+    --restart always \
+    --volume /docker/data/www:/htdocs \
+    alpine-apache-php:latest
 ```
-
-
-
-
